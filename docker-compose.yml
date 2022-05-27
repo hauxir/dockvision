@@ -6,3 +6,16 @@ services:
     volumes:
       - ./app:/app
       - /var/run/docker.sock:/var/run/docker.sock
+
+  caddy:
+    volumes:
+      - ./.caddy/Caddyfile:/etc/caddy/Caddyfile
+      - ./.caddy/data:/data
+    ports:
+      - "80:80"
+      - "443:443"
+    build:
+        context: .
+        dockerfile: Dockerfile.caddy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

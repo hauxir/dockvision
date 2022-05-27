@@ -6,14 +6,16 @@ RUN apt-get update && \
     nginx
 
 COPY requirements.txt .
-COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 RUN pip install -r requirements.txt
+RUN sed -i "s/80/5001/" /etc/nginx/sites-available/default
 
 EXPOSE 5000
 
 COPY app /app
 
 WORKDIR /app
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 CMD bash entrypoint.sh
