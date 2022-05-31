@@ -1,4 +1,6 @@
-from app import app
+from app import app as webapp, garbage_collector
 
-if __name__ == "__main__":
-    app.run()
+
+def app(*args, **kwargs):
+    garbage_collector()
+    return webapp(*args, **kwargs)
