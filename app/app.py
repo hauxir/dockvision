@@ -15,6 +15,7 @@ app.config["JSONIFY_PRETTYPRINT_REGULAR"] = True
 docker_client = docker.from_env()
 
 LABEL = "dockvision"
+
 HTTP_METHODS = [
     "GET",
     "HEAD",
@@ -91,7 +92,6 @@ def stop_container(container_id):
     timestamps.pop(container_id, None)
 
 
-
 def docker_proxy(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
@@ -120,6 +120,7 @@ def auth(func):
         if os.environ.get("TOKEN") and os.environ.get("TOKEN") != token:
             abort(401)
         return func(*args, **kwargs)
+
     return wrapper
 
 
