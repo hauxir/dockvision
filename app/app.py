@@ -1,4 +1,5 @@
 import functools
+import os
 import requests
 import threading
 import time
@@ -90,6 +91,7 @@ def stop_container(container_id):
     timestamps.pop(container_id, None)
 
 
+
 def docker_proxy(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
@@ -111,7 +113,18 @@ def docker_proxy(func):
     return wrapper
 
 
+def auth(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        token = request.headers.get("X-Token")
+        if os.environ.get("TOKEN") and os.environ.get("TOKEN") != token:
+            abort(401)
+        return func(*args, **kwargs)
+    return wrapper
+
+
 @app.route("/start", methods=["POST"])
+@auth
 @docker_proxy
 def start():
     form = request.get_json(force=True)
@@ -126,6 +139,7 @@ def start():
 
 
 @app.route("/stop", methods=["POST"])
+@auth
 @docker_proxy
 def stop():
     form = request.get_json(force=True)
@@ -135,6 +149,7 @@ def stop():
 
 
 @app.route("/containers")
+@auth
 @docker_proxy
 def containers():
     containers = get_containers()

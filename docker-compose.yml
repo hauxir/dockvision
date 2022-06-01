@@ -6,6 +6,8 @@ services:
     volumes:
       - ./app:/app
       - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - TOKEN=${TOKEN}
 
   caddy:
     volumes:
