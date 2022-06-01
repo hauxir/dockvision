@@ -95,7 +95,7 @@ def stop_container(container_id):
 def docker_proxy(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        host = request.headers.get("X-Forwarded-Host")
+        host = request.headers.get("X-Forwarded-Host") or ""
         container_id = host.split(".")[0][:5]
         if container_id != "admin":
             ip_address, port = get_docker_ip_and_port(container_id)
