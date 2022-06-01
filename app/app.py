@@ -1,13 +1,12 @@
+import functools
+import requests
 import threading
 import time
-import requests
 import urllib3
 
-import functools
 import cachetools.func
-
-from flask import Flask, jsonify, request, send_from_directory, Response, abort
 import docker
+from flask import Flask, jsonify, request, send_from_directory, Response, abort
 
 app = Flask(__name__)
 app.config["JSONIFY_PRETTYPRINT_REGULAR"] = True
@@ -26,6 +25,9 @@ HTTP_METHODS = [
     "TRACE",
     "PATCH",
 ]
+
+CONTAINER_IDLE_TIMEOUT = 15 * 60
+
 
 timestamps = dict()
 
@@ -142,7 +144,7 @@ def containers():
             image=c.__dict__["attrs"]["Config"]["Image"],
             status=c.__dict__["attrs"]["State"]["Status"],
             port=get_docker_ip_and_port(c.__dict__["attrs"]["Id"])[1],
-            timestamp=timestamps.get(c.__dict__["attrs"]["Id"][:5])
+            timestamp=timestamps.get(c.__dict__["attrs"]["Id"][:5]),
         )
         for c in containers
     ]
@@ -174,6 +176,6 @@ def garbage_collector():
         now = time.time()
         for cid in timestamp_container_ids:
             timestamp = timestamps[cid]
-            if (now - timestamp) >= 5 * 60:
+            if (now - timestamp) >= CONTAINER_IDLE_TIMEOUT:
                 stop_container(cid)
-        time.sleep(1)
+        time.sleep(30)
