@@ -162,20 +162,23 @@ def root(path):
 @threaded
 def garbage_collector():
     while True:
-        containers = get_containers()
-        container_ids = [c.__dict__["attrs"]["Id"][:5] for c in containers]
+        try:
+            containers = get_containers()
+            container_ids = [c.__dict__["attrs"]["Id"][:5] for c in containers]
 
-        timestamp_container_ids = list(timestamps.keys())
-        containers_without_timestamp = [
-            cid for cid in container_ids if cid not in timestamp_container_ids
-        ]
+            timestamp_container_ids = list(timestamps.keys())
+            containers_without_timestamp = [
+                cid for cid in container_ids if cid not in timestamp_container_ids
+            ]
 
-        for cid in containers_without_timestamp:
-            stop_container(cid)
-
-        now = time.time()
-        for cid in timestamp_container_ids:
-            timestamp = timestamps[cid]
-            if (now - timestamp) >= CONTAINER_IDLE_TIMEOUT:
+            for cid in containers_without_timestamp:
                 stop_container(cid)
+
+            now = time.time()
+            for cid in timestamp_container_ids:
+                timestamp = timestamps[cid]
+                if (now - timestamp) >= CONTAINER_IDLE_TIMEOUT:
+                    stop_container(cid)
+        except Exception as e:
+            print(e)
         time.sleep(30)
